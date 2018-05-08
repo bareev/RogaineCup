@@ -154,7 +154,8 @@ RogaineCup::~RogaineCup()
     delete set;
     newData->close();
     delete newData;
-    //delete particip;
+    particip->close();
+    delete particip;
     delete openQFile;
     delete geninfo;
     delete protocolcurrent;
@@ -184,7 +185,9 @@ void RogaineCup::enableAll(bool pr)
     if (openfile)
         GetInfoFromMemoryToForm();
     else
+    {
         ui->tableWidget->setRowCount(0);
+    }
 
 }
 
@@ -545,6 +548,15 @@ void RogaineCup::onCloseFile()
 
 
     enableAll(false);
+
+    //удаляем всю текущую информацию
+    geninfo->numberpart = 0;
+    geninfo->numetaps = 0;
+    protocolcurrent->number = -1;
+    protocolcurrent->text.clear();
+    //информация по этапам
+    etapInfos.clear();
+    etapProtoclos.clear();
 }
 
 
