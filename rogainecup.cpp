@@ -651,60 +651,103 @@ void RogaineCup::ExportAllSumm()
 
         QFile* templates;
         templates = new QFile;
-        templates->setFileName("./files/template_csv.txt");
 
-        if (templates->open(QIODevice::ReadOnly))
+        if (newFile.right(3).compare("csv", Qt::CaseInsensitive) == 0)
         {
+            templates->setFileName("./files/template_csv.txt");
 
-            QTextStream temp(templates);
-            temp.setCodec("windows1251");
-            QString head = temp.readLine();
-
-            for (int j = 0; j < geninfo->numetaps; j++)
+            if (templates->open(QIODevice::ReadOnly))
             {
-                head += ";";
-                head += etapInfos.at(j).text.at(0).left(10);
-                head += ". ";
-                head += etapInfos.at(j).text.at(1);
-                head += QString(". Формат %1 часов").arg(etapInfos.at(j).format, 0, 'f', 1);
-                if (etapInfos.at(j).calc)
-                    head += QString(". Коэффициент %2").arg(etapInfos.at(j).koeff, 0, 'f', 3);
-                else
-                    head += ". Зачёт за участие";
-            }
 
-            stream << head;
-            stream << "\n";
+                QTextStream temp(templates);
+                temp.setCodec("windows1251");
+                QString head = temp.readLine();
 
-            if (newFile.right(3).compare("csv", Qt::CaseInsensitive) == 0)
-            {
-                for (int i = 0; i < geninfo->numberpart; i++)
+                for (int j = 0; j < geninfo->numetaps; j++)
                 {
-                    bool finddata = false;
-                    QStringList s = protocolcurrent->text.at(i).split(";");
-                    if (s.at(6).toDouble() > 0)
-                        finddata = true;
+                    head += ";";
+                    head += etapInfos.at(j).text.at(0).left(10);
+                    head += ". ";
+                    head += etapInfos.at(j).text.at(1);
+                    head += QString(". Формат %1 часов").arg(etapInfos.at(j).format, 0, 'f', 1);
+                    if (etapInfos.at(j).calc)
+                        head += QString(". Коэффициент %2").arg(etapInfos.at(j).koeff, 0, 'f', 3);
                     else
+                        head += ". Зачёт за участие";
+                }
+
+                stream << head;
+                stream << "\n";
+
+                if (newFile.right(3).compare("csv", Qt::CaseInsensitive) == 0)
+                {
+                    for (int i = 0; i < geninfo->numberpart; i++)
                     {
-                        for (int fd = 7; fd < s.length(); fd++)
+                        bool finddata = false;
+                        QStringList s = protocolcurrent->text.at(i).split(";");
+                        if (s.at(6).toDouble() > 0)
+                            finddata = true;
+                        else
                         {
-                            if ((!s.at(fd).isEmpty()) && (s.at(fd).compare("+") != 0))
-                                finddata = true;
+                            for (int fd = 7; fd < s.length(); fd++)
+                            {
+                                if ((!s.at(fd).isEmpty()) && (s.at(fd).compare("+") != 0))
+                                    finddata = true;
+                            }
+                        }
+                        if (finddata)
+                        {
+                            stream << protocolcurrent->text.at(i);
+                            stream << "\n";
                         }
                     }
-                    if (finddata)
-                    {
-                        stream << protocolcurrent->text.at(i);
-                        stream << "\n";
-                    }
                 }
-            }
-            templates->close();
+                templates->close();
 
-            QMessageBox::warning(this, "Внимание", "Экспорт произведен успешно!!!");
+                QMessageBox::warning(this, "Внимание", "Экспорт произведен успешно!!!");
+            }
+            else
+                QMessageBox::warning(this, "Ошибка", "Не найден файл заголовка template_csv.txt!!!");
+
         }
-        else
-            QMessageBox::warning(this, "Ошибка", "Не найден файл заголовка template_csv.txt!!!");
+
+        else if (newFile.right(4).compare("html", Qt::CaseInsensitive) == 0)
+        {
+            templates->setFileName("./files/template_htm.html");
+            if (templates->open(QIODevice::ReadOnly))
+            {
+
+                QTextStream temp(templates);
+                temp.setCodec("windows1251");
+                QString head = temp.readAll();
+
+                for (int j = 0; j < geninfo->numetaps; j++)
+                {
+                    QString headTemp = etapInfos.at(j).text.at(0).left(10);
+                    headTemp += ". ";
+                    headTemp += etapInfos.at(j).text.at(1);
+                    headTemp += QString(". Формат %1 часов").arg(etapInfos.at(j).format, 0, 'f', 1);
+                    if (etapInfos.at(j).calc)
+                        headTemp += QString(". Коэффициент %2").arg(etapInfos.at(j).koeff, 0, 'f', 3);
+                    else
+                        headTemp += ". Зачёт за участие";
+
+                    head += QString("<th class=\"vl\">%1</th>").arg(headTemp);
+                }
+
+                stream << head;
+
+                //финальная вставка
+                stream << "\n";
+                stream << "   </tr>\n";
+                stream << "  </table>\n";
+                stream << " </body>\n";
+                stream << "</html>\n";
+
+                templates->close();
+            }
+
+        }
 
         csv->close();
         delete templates;
