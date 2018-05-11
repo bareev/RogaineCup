@@ -735,17 +735,51 @@ void RogaineCup::ExportAllSumm()
                     head += QString("<th class=\"vl\">%1</th>").arg(headTemp);
                 }
 
+                //вписали заголовок
                 stream << head;
+                stream << "\n   </tr>\n";
+
+                //запись основного тела
+                if (newFile.right(4).compare("html", Qt::CaseInsensitive) == 0)
+                {
+                    for (int i = 0; i < geninfo->numberpart; i++)
+                    {
+                        bool finddata = false;
+                        QStringList s = protocolcurrent->text.at(i).split(";");
+                        if (s.at(6).toDouble() > 0)
+                            finddata = true;
+                        else
+                        {
+                            for (int fd = 7; fd < s.length(); fd++)
+                            {
+                                if ((!s.at(fd).isEmpty()) && (s.at(fd).compare("+") != 0))
+                                    finddata = true;
+                            }
+                        }
+                        if (finddata)
+                        {
+                            QString strokatemp;
+                            strokatemp.clear();
+                            strokatemp += "   <tr>\n";
+                            strokatemp += "    ";
+                            for (int tmp = 0; tmp < s.length(); tmp++)
+                                strokatemp += QString("<td class=\"vl\">%1</td>").arg(s.at(tmp));
+                            stream << strokatemp;
+                            stream << "\n   </tr>\n";
+                        }
+                    }
+                }
 
                 //финальная вставка
-                stream << "\n";
-                stream << "   </tr>\n";
                 stream << "  </table>\n";
                 stream << " </body>\n";
                 stream << "</html>\n";
-
                 templates->close();
+
+                QMessageBox::warning(this, "Внимание", "Экспорт произведен успешно!!!");
             }
+            else
+                QMessageBox::warning(this, "Ошибка", "Не найден файл заголовка template_htm.html!!!");
 
         }
 
