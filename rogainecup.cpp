@@ -763,7 +763,12 @@ void RogaineCup::ExportAllSumm()
                             strokatemp += "   <tr>\n";
                             strokatemp += "    ";
                             for (int tmp = 0; tmp < s.length(); tmp++)
-                                strokatemp += QString("<td class=\"vl\">%1</td>").arg(s.at(tmp));
+                            {
+                                if (!s.at(tmp).isEmpty())
+                                    strokatemp += QString("<td class=\"vl\">%1</td>").arg(s.at(tmp));
+                                else
+                                    strokatemp += QString("<td class=\"vl\">%1</td>").arg("&nbsp;");
+                            }
                             stream << strokatemp;
                             stream << "\n   </tr>\n";
                         }
