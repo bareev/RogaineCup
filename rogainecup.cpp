@@ -1016,7 +1016,8 @@ void RogaineCup::slotRemoveRecord()
     QTableWidgetItem * items = ui->tableWidget->itemAt(positionTable);
     int row = items->row();
     protocolcurrent->text.removeAt(row);
-    protocolcurrent->number--;
+    //2018/05/22 не убираем количество этапов
+    //protocolcurrent->number--;
     geninfo->numberpart--;
 
     QMessageBox::warning(this, "Внимание", "Запись удалена из базы!!! Места в группе обновятся при добавлении нового протокола");
