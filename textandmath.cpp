@@ -225,6 +225,27 @@ bool TextAndMath::WriteNewSumma(QStringList cursumma, QStringList summa, QString
     return true;
 }
 
+
+bool TextAndMath::UpdateSumma(QStringList cursumma, QStringList *newsumma, QString settingsGR, int kolvostarts)
+{
+
+    int offset = 6;
+
+    //подсчитываем общую сумму!!!
+    Summa4(&cursumma, kolvostarts, offset);
+
+    //записали новую сумму в лист participall
+    qSort(cursumma.begin(), cursumma.end(), compareTwoStrings);
+
+    //записываем места по группам!!!
+    NewCounter(&cursumma, settingsGR);
+
+    *newsumma = cursumma;
+
+
+    return true;
+}
+
 //ищем максимум в протоколе
 double TextAndMath::calcRes(QStringList spisok, double koeff, double format)
 {

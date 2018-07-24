@@ -22,9 +22,12 @@ AddNewFile::AddNewFile(QWidget *parent) :
 
 AddNewFile::~AddNewFile()
 {
-    delete protocolCur;
-    delete etapCur;
-    delete ui;
+    if (protocolCur)
+        delete protocolCur;
+    if (etapCur)
+        delete etapCur;
+    if (ui)
+        delete ui;
 }
 
 void AddNewFile::init(int i, SettingsDS set)

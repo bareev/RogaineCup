@@ -31,9 +31,12 @@ Settings::Settings(QWidget *parent) :
 
 Settings::~Settings()
 {
-    delete defaultsettings;
-    delete currentsettings;
-    delete ui;
+    if (defaultsettings)
+        delete defaultsettings;
+    if (currentsettings)
+        delete currentsettings;
+    if (ui)
+        delete ui;
 }
 
 void Settings::onDefLoad()

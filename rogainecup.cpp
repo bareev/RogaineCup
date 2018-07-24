@@ -82,6 +82,7 @@ RogaineCup::RogaineCup(QWidget *parent) :
     //установка поля ввода/вывода
     ui->tableWidget->setColumnCount(7);
     QString *list = new QString;
+    list->clear();
     *list = "Место, Группа, Место в группе, Участник, Регион, Год рождения, Текущая сумма";
     for (int i = 0; i < 7; i++)
     {
@@ -89,7 +90,8 @@ RogaineCup::RogaineCup(QWidget *parent) :
         item->setText(QStringList(list->split(",")).at(i));
         ui->tableWidget->setHorizontalHeaderItem(i, item);
     }
-    delete list;
+    if (list)
+        delete list;
 
     // не открыт ни один файл
     enableAll(false);
@@ -138,7 +140,7 @@ RogaineCup::RogaineCup(QWidget *parent) :
     connect(newData, SIGNAL(OnCancel()), this, SLOT(NewFileCancel()));
     connect(newData, SIGNAL(OnNewFile(ProtocolDS,etapDS)), this, SLOT(NewFileAdd(ProtocolDS,etapDS)));
 
-    openQFile = new QFile;
+    openQFile = new QFile(this);
 
     TxtWork = new TextAndMath;
 
@@ -150,17 +152,31 @@ RogaineCup::RogaineCup(QWidget *parent) :
 
 RogaineCup::~RogaineCup()
 {
-    set->close();
-    delete set;
-    newData->close();
-    delete newData;
-    particip->close();
-    delete particip;
-    delete openQFile;
-    delete geninfo;
-    delete protocolcurrent;
-    delete TxtWork;
-    delete ui;
+    if (set)
+    {
+        set->close();
+        delete set;
+    }
+    if (newData)
+    {
+        newData->close();
+        delete newData;
+    }
+    if (particip)
+    {
+        particip->close();
+        delete particip;
+    }
+    if (openQFile)
+        delete openQFile;
+    if (geninfo)
+        delete geninfo;
+    if (protocolcurrent)
+        delete protocolcurrent;
+    if (TxtWork)
+        delete TxtWork;
+    if (ui)
+        delete ui;
 }
 
 //открыт/закрыт файл
@@ -286,6 +302,8 @@ void RogaineCup::onOpenExistFile()
     //изменяем размер информации по этапам
     ProtocolDS tempProt;
     etapDS tempEtap;
+    onNewInfos(&tempProt);
+    onNewInfos(&tempEtap);
 
     for (int i = 0; i < geninfo->numetaps; i++)
     {
@@ -359,6 +377,7 @@ void RogaineCup::WriteGenSets(QFile *file)
 
         QDataStream stream(file);
         SettingsDS newSets;
+        onNewInfos(&newSets);
 
         newSets = *(set->currentsettings);
 
@@ -376,6 +395,7 @@ void RogaineCup::ReadGenSets(QFile *file)
 
         QDataStream stream(file);
         SettingsDS newSets;
+        onNewInfos(&newSets);
 
         stream >> newSets;
 
@@ -392,6 +412,7 @@ void RogaineCup::WriteGenInfo(QFile *file)
     {
         QDataStream stream(file);
         generalpos newSets;
+        onNewInfos(&newSets);
 
         newSets = *geninfo;
 
@@ -406,6 +427,7 @@ void RogaineCup::ReadGenInfo(QFile *file)
     {
         QDataStream stream(file);
         generalpos newSets;
+        onNewInfos(&newSets);
 
         stream >> newSets;
 
@@ -420,6 +442,7 @@ void RogaineCup::WriteCurSumma(QFile *file)
     {
         QDataStream stream(file);
         ProtocolDS newSets;
+        onNewInfos(&newSets);
 
         newSets = *protocolcurrent;
 
@@ -434,6 +457,7 @@ void RogaineCup::ReadCurSumma(QFile *file)
     {
         QDataStream stream(file);
         ProtocolDS newSets;
+        onNewInfos(&newSets);
 
         stream >> newSets;
 
@@ -448,6 +472,7 @@ void RogaineCup::WriteEtapProt(QFile *file, int i)
     {
         QDataStream stream(file);
         ProtocolDS newSets;
+        onNewInfos(&newSets);
 
         newSets = etapProtoclos.at(i);
 
@@ -462,10 +487,12 @@ void RogaineCup::ReadEtapProt(QFile *file, int i)
     {
         QDataStream stream(file);
         ProtocolDS newSets;
+        onNewInfos(&newSets);
 
         stream >> newSets;
 
-        etapProtoclos.replace(i, newSets);
+        if (i < geninfo->numetaps)
+            etapProtoclos.replace(i, newSets);
     }
 }
 
@@ -476,6 +503,7 @@ void RogaineCup::WriteEtapInfo(QFile *file, int i)
     {
         QDataStream stream(file);
         etapDS newSets;
+        onNewInfos(&newSets);
 
         newSets = etapInfos.at(i);
 
@@ -490,11 +518,54 @@ void RogaineCup::ReadEtapInfo(QFile *file, int i)
     {
         QDataStream stream(file);
         etapDS newSets;
+        onNewInfos(&newSets);
 
         stream >> newSets;
 
-        etapInfos.replace(i, newSets);
+        if (i < geninfo->numetaps)
+            etapInfos.replace(i, newSets);
     }
+}
+
+
+//очистка вновь созданного
+void RogaineCup::onNewInfos(etapDS* newSets)
+{
+    newSets->calc = false;
+    newSets->etapnumber = 0;
+    newSets->format = 0;
+    newSets->koeff = 0;
+    newSets->map = QPixmap();
+    newSets->text.clear();
+
+    return;
+}
+
+//очистка вновь созданного
+void RogaineCup::onNewInfos(ProtocolDS* newSets)
+{
+    newSets->number = 0;
+    newSets->text.clear();
+
+    return;
+}
+
+//очистка вновь созданного
+void RogaineCup::onNewInfos(generalpos *newSets)
+{
+    newSets->numberpart = 0;
+    newSets->numetaps = 0;
+
+    return;
+}
+
+void RogaineCup::onNewInfos(SettingsDS *newSets)
+{
+    newSets->priznak = false;
+    newSets->summa = 0;
+    newSets->text.clear();
+
+    return;
 }
 
 
@@ -641,7 +712,7 @@ void RogaineCup::ExportAllSumm()
         return;
 
     QFile* csv;
-    csv = new QFile;
+    csv = new QFile(this);
     csv->setFileName(newFile);
 
     if (csv->open(QIODevice::WriteOnly))
@@ -650,7 +721,7 @@ void RogaineCup::ExportAllSumm()
         stream.setCodec("windows1251");
 
         QFile* templates;
-        templates = new QFile;
+        templates = new QFile(this);
 
         if (newFile.right(3).compare("csv", Qt::CaseInsensitive) == 0)
         {
@@ -789,12 +860,14 @@ void RogaineCup::ExportAllSumm()
         }
 
         csv->close();
-        delete templates;
+        if (templates)
+            delete templates;
     }
     else
         QMessageBox::warning(this, "Ошибка", "Ошибка экспорта!!!");
 
-    delete csv;
+    if (csv)
+        delete csv;
 
     return;
 }
@@ -853,7 +926,7 @@ void RogaineCup::ExportEtapInfo()
         return;
 
     QFile* csv;
-    csv = new QFile;
+    csv = new QFile(this);
     csv->setFileName(newFile);
 
     if (csv->open(QIODevice::WriteOnly))
@@ -865,7 +938,7 @@ void RogaineCup::ExportEtapInfo()
         {
 
             QFile* templates;
-            templates = new QFile;
+            templates = new QFile(this);
             templates->setFileName("./files/template_etap_csv.txt");
 
             if (templates->open(QIODevice::ReadOnly))
@@ -904,7 +977,8 @@ void RogaineCup::ExportEtapInfo()
             else
                 QMessageBox::warning(this, "Ошибка", "Не найден файл заголовка template_csv.txt!!!");
 
-            delete templates;
+            if (templates)
+                delete templates;
         }
 
         csv->close();
@@ -912,7 +986,8 @@ void RogaineCup::ExportEtapInfo()
     else
         QMessageBox::warning(this, "Ошибка", "Ошибка экспорта!!!");
 
-    delete csv;
+    if (csv)
+        delete csv;
 
     return;
 
@@ -933,7 +1008,7 @@ void RogaineCup::ExportLeaders()
         return;
 
     QFile* csv;
-    csv = new QFile;
+    csv = new QFile(this);
     csv->setFileName(newFile);
 
     if (csv->open(QIODevice::WriteOnly))
@@ -969,7 +1044,8 @@ void RogaineCup::ExportLeaders()
     else
         QMessageBox::warning(this, "Ошибка", "Ошибка экспорта!!!");
 
-    delete csv;
+    if (csv)
+        delete csv;
 
     return;
 
@@ -1022,6 +1098,9 @@ void RogaineCup::slotRemoveRecord()
 
     QMessageBox::warning(this, "Внимание", "Запись удалена из базы!!! Места в группе обновятся при добавлении нового протокола");
 
+    QStringList list;
+    TxtWork->UpdateSumma(protocolcurrent->text, &list, set->currentsettings->text.at(0), set->currentsettings->summa);
+    protocolcurrent->text = list;
     CheckFileSize();
     return;
 }
@@ -1063,6 +1142,11 @@ void RogaineCup::slotOkEdit(QString group, QString region, QString name, QString
 
 
     particip->hide();
+
+    QStringList list;
+    TxtWork->UpdateSumma(protocolcurrent->text, &list, set->currentsettings->text.at(0), set->currentsettings->summa);
+    protocolcurrent->text = list;
+
     setEnabled(true);
     return;
 }

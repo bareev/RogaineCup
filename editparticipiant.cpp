@@ -17,7 +17,8 @@ EditParticipiant::EditParticipiant(QWidget *parent) :
 
 EditParticipiant::~EditParticipiant()
 {
-    delete ui;
+    if (ui)
+        delete ui;
 }
 
 void EditParticipiant::init(QString group, QString region, QString name, QString gr)

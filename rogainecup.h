@@ -99,6 +99,12 @@ private slots:
     void slotCancelEdit();
     void slotOkEdit(QString group, QString region, QString name, QString gr);
 
+    //очистка созданных этапов и информации по ним
+    void onNewInfos(ProtocolDS* newSets);
+    void onNewInfos(etapDS* newSets);
+    void onNewInfos(generalpos* newSets);
+    void onNewInfos(SettingsDS* newSets);
+
 };
 
 

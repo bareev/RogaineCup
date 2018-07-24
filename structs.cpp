@@ -18,7 +18,8 @@ Protocol::Protocol()
 
 Protocol::~Protocol()
 {
-    delete txt;
+    if (txt)
+        delete txt;
 }
 
 
@@ -40,7 +41,8 @@ int Protocol::ReadProtocol(QString fileName, SettingsDS genSets, int* errorStrok
     if (!openfile)
     {
         *errorStroka = strerror;
-        delete protocol;
+        if (protocol)
+            delete protocol;
         return 2;
     }
 
@@ -75,7 +77,8 @@ int Protocol::ReadProtocol(QString fileName, SettingsDS genSets, int* errorStrok
         {
             *errorStroka = strerror;
             protocol->close();
-            delete protocol;
+            if (protocol)
+                delete protocol;
             return 3;
         }
 
@@ -85,7 +88,8 @@ int Protocol::ReadProtocol(QString fileName, SettingsDS genSets, int* errorStrok
         {
             *errorStroka = strerror;
             protocol->close();
-            delete protocol;
+            if (protocol)
+                delete protocol;
             return 4;
         }
 
@@ -95,7 +99,8 @@ int Protocol::ReadProtocol(QString fileName, SettingsDS genSets, int* errorStrok
         {
             *errorStroka = strerror;
             protocol->close();
-            delete protocol;
+            if (protocol)
+                delete protocol;
             return 5;
         }
 
@@ -105,7 +110,8 @@ int Protocol::ReadProtocol(QString fileName, SettingsDS genSets, int* errorStrok
         {
             *errorStroka = strerror;
             protocol->close();
-            delete protocol;
+            if (protocol)
+                delete protocol;
             return 6;
         }
 
@@ -115,7 +121,8 @@ int Protocol::ReadProtocol(QString fileName, SettingsDS genSets, int* errorStrok
         {
             *errorStroka = strerror;
             protocol->close();
-            delete protocol;
+            if (protocol)
+                delete protocol;
             return 6;
         }
 
@@ -125,7 +132,8 @@ int Protocol::ReadProtocol(QString fileName, SettingsDS genSets, int* errorStrok
     prot.number = strerror - 1;
 
     protocol->close();
-    delete protocol;
+    if (protocol)
+        delete protocol;
 
     return 0;
 }

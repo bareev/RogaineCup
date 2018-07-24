@@ -13,6 +13,7 @@ public:
     QStringList getLeadersForGroups(QStringList curprot, QString settingsGR);
     //запись нового протокола
     bool WriteNewSumma(QStringList cursumma, QStringList summa, QStringList *newsumma, bool calc, double koeff, double format, int ns, QString settingsGR, int kolvostarts);
+    bool UpdateSumma(QStringList cursumma, QStringList *newsumma, QString settingsGR, int kolvostarts);
 
 private:
     double calcRes(QStringList spisok, double koeff, double format);
