@@ -54,6 +54,7 @@ private slots:
     void onOpenNewFile();
     void onOpenExistFile();
     void onSaveFile();
+    void onSaveAsFile();
     void onCloseFile();
     void onSettingsClicked();
     void onAddNewFile();
@@ -104,6 +105,14 @@ private slots:
     void onNewInfos(etapDS* newSets);
     void onNewInfos(generalpos* newSets);
     void onNewInfos(SettingsDS* newSets);
+
+    void onOpenQFile(bool open);
+
+public:
+    void onOpenExistFileCmd(QString name);
+
+signals:
+    void openQFileSignal(bool open);
 
 };
 

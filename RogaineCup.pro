@@ -31,3 +31,6 @@ FORMS    += rogainecup.ui \
     settings.ui \
     addnewfile.ui \
     editparticipiant.ui
+
+RESOURCES += \
+    resourses.qrc

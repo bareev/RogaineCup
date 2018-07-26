@@ -8,6 +8,13 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
     RogaineCup w;
+
+    if (argc > 1)
+    {
+        QString namefile = QString(argv[1]);
+        w.onOpenExistFileCmd(namefile);
+    }
+
     w.show();
 
     return a.exec();

@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/res">
+        <file alias="add.png">RC_release/files/add.png</file>
+        <file alias="close.png">RC_release/files/close.png</file>
+        <file alias="exit.png">RC_release/files/exit.png</file>
+        <file alias="new.png">RC_release/files/new.png</file>
+        <file alias="open.png">RC_release/files/open.png</file>
+        <file alias="save.png">RC_release/files/save.png</file>
+        <file alias="saveas.png">RC_release/files/saveas.png</file>
+        <file alias="settings.png">RC_release/files/settings.png</file>
+        <file alias="template_csv.txt">RC_release/files/template_csv.txt</file>
+        <file alias="template_etap_csv.txt">RC_release/files/template_etap_csv.txt</file>
+        <file alias="template_htm.html">RC_release/files/template_htm.html</file>
+    </qresource>
+</RCC>

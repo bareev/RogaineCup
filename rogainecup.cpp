@@ -68,15 +68,15 @@ RogaineCup::RogaineCup(QWidget *parent) :
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("utf8"));
 
     //установка иконок
-    ui->pushButton_4->setIcon(QIcon("./files/new.png"));
-    ui->pushButton->setIcon(QIcon("./files/open.png"));
-    ui->pushButton_2->setIcon(QIcon("./files/save.png"));
-    ui->pushButton_3->setIcon(QIcon("./files/exit.png"));
-    ui->pushButton_5->setIcon(QIcon("./files/settings.png"));
-    ui->pushButton_6->setIcon(QIcon("./files/add.png"));
-    ui->pushButton_7->setIcon(QIcon("./files/close.png"));
-    ui->pushButton_12->setIcon(QIcon("./files/saveas.png"));
-    ui->pushButton_13->setIcon(QIcon("./files/update.png"));
+    ui->pushButton_4->setIcon(QIcon(":/res/new.png"));
+    ui->pushButton->setIcon(QIcon(":/res/open.png"));
+    ui->pushButton_2->setIcon(QIcon(":/res/save.png"));
+    ui->pushButton_3->setIcon(QIcon(":/res/exit.png"));
+    ui->pushButton_5->setIcon(QIcon(":/res/settings.png"));
+    ui->pushButton_6->setIcon(QIcon(":/res/add.png"));
+    ui->pushButton_7->setIcon(QIcon(":/res/close.png"));
+    ui->pushButton_12->setIcon(QIcon(":/res/saveas.png"));
+    ui->pushButton_13->setIcon(QIcon(":/res/update.png"));
 
 
     //установка поля ввода/вывода
@@ -109,6 +109,8 @@ RogaineCup::RogaineCup(QWidget *parent) :
     connect(ui->pushButton_10, SIGNAL(clicked()), this, SLOT(ExportEtapMap()));
     connect(ui->pushButton_9, SIGNAL(clicked()), this, SLOT(ExportEtapInfo()));
     connect(ui->pushButton_11, SIGNAL(clicked()), this, SLOT(ExportLeaders()));
+
+    connect(ui->pushButton_12, SIGNAL(clicked()), this, SLOT(onSaveAsFile()));
 
     //вспомогательная форма настроек
     set = new Settings;
@@ -148,6 +150,9 @@ RogaineCup::RogaineCup(QWidget *parent) :
 
     connect(particip, SIGNAL(onCancel()), this, SLOT(slotCancelEdit()));
     connect(particip, SIGNAL(onOk(QString,QString,QString,QString)), this, SLOT(slotOkEdit(QString,QString,QString,QString)));
+
+    //имя окна меняем
+    connect(this, SIGNAL(openQFileSignal(bool)), this, SLOT(onOpenQFile(bool)));
 }
 
 RogaineCup::~RogaineCup()
@@ -205,6 +210,20 @@ void RogaineCup::enableAll(bool pr)
         ui->tableWidget->setRowCount(0);
     }
 
+    //сигнал на изменение имени
+    emit openQFileSignal(pr);
+
+}
+
+// изменяем имя окна
+void RogaineCup::onOpenQFile(bool open)
+{
+    QString name("RogaineCup");
+
+    if (open && !openQFile->fileName().isEmpty())
+        name.append(" - ").append(openQFile->fileName());
+
+    setWindowTitle(name);
 }
 
 //создание нового файла!!!!!!!
@@ -334,6 +353,71 @@ void RogaineCup::onOpenExistFile()
 
 }
 
+
+//открытие текущего файла без диалогового окна
+void RogaineCup::onOpenExistFileCmd(QString name)
+{
+
+    //файл не выбран
+    if (name.isEmpty())
+        return;
+
+    //закрываем файл
+    onCloseFile();
+
+    //создать или проверить файл
+    openQFile->setFileName(name);
+
+    //файл существует
+    if (!openQFile->open(QIODevice::ReadWrite))
+    {
+        QMessageBox::warning(this, "Внимание", "Файл неисправен!!!");
+        return;
+    }
+
+    //считываем информацию из файла, если он не пустой
+    if (QFileInfo(openQFile->fileName()).size() > 0)
+    {
+        ReadGenSets(openQFile);
+        ReadGenInfo(openQFile);
+    }
+
+    //изменяем размер информации по этапам
+    ProtocolDS tempProt;
+    etapDS tempEtap;
+    onNewInfos(&tempProt);
+    onNewInfos(&tempEtap);
+
+    for (int i = 0; i < geninfo->numetaps; i++)
+    {
+        etapInfos.append(tempEtap);
+        etapProtoclos.append(tempProt);
+    }
+
+    //считываем текущую сумму
+    if (!openQFile->atEnd())
+    {
+        ReadCurSumma(openQFile);
+    }
+
+    //считываем информацию по этапам
+    int etn = 0;
+    while (!openQFile->atEnd())
+    {
+        ReadEtapInfo(openQFile, etn);
+        ReadEtapProt(openQFile, etn);
+        etn++;
+    }
+
+    //закрываем файл
+    openQFile->close();
+
+    //файл открыт!!!
+    CheckFileSize();
+
+}
+
+
 //сохранение текущего файла
 void RogaineCup::onSaveFile()
 {
@@ -343,6 +427,44 @@ void RogaineCup::onSaveFile()
     {
         if (openQFile->isOpen())
             openQFile->close();
+
+        openQFile->open(QIODevice::ReadWrite);
+
+        //записываем информацию в файл
+        WriteGenSets(openQFile);
+        WriteGenInfo(openQFile);
+
+        if (protocolcurrent->number != -1)
+        {
+            WriteCurSumma(openQFile);
+            for (int j = 0; j < protocolcurrent->number; j++)
+            {
+                WriteEtapInfo(openQFile, j);
+                WriteEtapProt(openQFile, j);
+            }
+        }
+
+
+        //отображаем содержимое
+        CheckFileSize();
+
+        openQFile->close();
+    }
+
+}
+
+//сохранение текущего файла
+void RogaineCup::onSaveAsFile()
+{
+    //диалоговое окно
+    QString newFile = QFileDialog::getSaveFileName(this, QString("Сохранить текущий файл как"), QDir::currentPath(), QString("Файл менеджера кубка по рогейну (*.rcm)"));
+    if ((openfile) && (!newFile.isEmpty()))
+    {
+
+        if (openQFile->isOpen())
+            openQFile->close();
+
+        openQFile->setFileName(newFile);
 
         openQFile->open(QIODevice::ReadWrite);
 
@@ -725,7 +847,7 @@ void RogaineCup::ExportAllSumm()
 
         if (newFile.right(3).compare("csv", Qt::CaseInsensitive) == 0)
         {
-            templates->setFileName("./files/template_csv.txt");
+            templates->setFileName(":/res/template_csv.txt");
 
             if (templates->open(QIODevice::ReadOnly))
             {
@@ -784,7 +906,7 @@ void RogaineCup::ExportAllSumm()
 
         else if (newFile.right(4).compare("html", Qt::CaseInsensitive) == 0)
         {
-            templates->setFileName("./files/template_htm.html");
+            templates->setFileName(":/res/template_htm.html");
             if (templates->open(QIODevice::ReadOnly))
             {
 
@@ -939,7 +1061,7 @@ void RogaineCup::ExportEtapInfo()
 
             QFile* templates;
             templates = new QFile(this);
-            templates->setFileName("./files/template_etap_csv.txt");
+            templates->setFileName(":/res/template_etap_csv.txt");
 
             if (templates->open(QIODevice::ReadOnly))
             {
@@ -1096,12 +1218,13 @@ void RogaineCup::slotRemoveRecord()
     //protocolcurrent->number--;
     geninfo->numberpart--;
 
-    QMessageBox::warning(this, "Внимание", "Запись удалена из базы!!! Места в группе обновятся при добавлении нового протокола");
-
     QStringList list;
     TxtWork->UpdateSumma(protocolcurrent->text, &list, set->currentsettings->text.at(0), set->currentsettings->summa);
     protocolcurrent->text = list;
     CheckFileSize();
+
+    QMessageBox::warning(this, "Внимание", "Запись удалена из базы!!! Места в группе обновлены");
+
     return;
 }
 
@@ -1137,15 +1260,15 @@ void RogaineCup::slotOkEdit(QString group, QString region, QString name, QString
 
     protocolcurrent->text.replace(row, new_text);
 
-    CheckFileSize();
-    QMessageBox::warning(this, "Внимание", "Запись в базе изменена!!! Места в группе обновятся при добавлении нового протокола");
-
-
     particip->hide();
 
     QStringList list;
     TxtWork->UpdateSumma(protocolcurrent->text, &list, set->currentsettings->text.at(0), set->currentsettings->summa);
     protocolcurrent->text = list;
+
+    CheckFileSize();
+
+    QMessageBox::warning(this, "Внимание", "Запись в базе изменена!!! Места в группе обновлены");
 
     setEnabled(true);
     return;
