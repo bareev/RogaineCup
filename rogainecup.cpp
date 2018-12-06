@@ -1163,6 +1163,88 @@ void RogaineCup::ExportLeaders()
         QMessageBox::warning(this, "Внимание", "Экспорт произведен успешно!!!");
 
     }
+    else if (newFile.right(4).compare("html", Qt::CaseInsensitive) == 0)
+    {
+        /*QTextStream stream(csv);
+        stream.setCodec("windows1251");
+
+        stream << set->currentsettings->text.at(2);
+        stream << "\n";
+        stream << QString("Текущие лидеры после %1 этапов").arg(protocolcurrent->number);
+        stream << "\n";
+        stream << "\n";
+
+
+
+            QTextStream temp(templates);
+            temp.setCodec("windows1251");
+            QString head = temp.readAll();
+
+            for (int j = 0; j < geninfo->numetaps; j++)
+            {
+                QString headTemp = etapInfos.at(j).text.at(0).left(10);
+                headTemp += ". ";
+                headTemp += etapInfos.at(j).text.at(1);
+                headTemp += QString(". Формат %1 часов").arg(etapInfos.at(j).format, 0, 'f', 1);
+                if (etapInfos.at(j).calc)
+                    headTemp += QString(". Коэффициент %2").arg(etapInfos.at(j).koeff, 0, 'f', 3);
+                else
+                    headTemp += ". Зачёт за участие";
+
+                head += QString("<th class=\"vl\">%1</th>").arg(headTemp);
+            }
+
+            //вписали заголовок
+            stream << head;
+            stream << "\n   </tr>\n";
+
+            //запись основного тела
+            if (newFile.right(4).compare("html", Qt::CaseInsensitive) == 0)
+            {
+                for (int i = 0; i < geninfo->numberpart; i++)
+                {
+                    bool finddata = false;
+                    QStringList s = protocolcurrent->text.at(i).split(";");
+                    if (s.at(6).toDouble() > 0)
+                        finddata = true;
+                    else
+                    {
+                        for (int fd = 7; fd < s.length(); fd++)
+                        {
+                            if ((!s.at(fd).isEmpty()) && (s.at(fd).compare("+") != 0))
+                                finddata = true;
+                        }
+                    }
+                    if (finddata)
+                    {
+                        QString strokatemp;
+                        strokatemp.clear();
+                        strokatemp += "   <tr>\n";
+                        strokatemp += "    ";
+                        for (int tmp = 0; tmp < s.length(); tmp++)
+                        {
+                            if (!s.at(tmp).isEmpty())
+                                strokatemp += QString("<td class=\"vl\">%1</td>").arg(s.at(tmp));
+                            else
+                                strokatemp += QString("<td class=\"vl\">%1</td>").arg("&nbsp;");
+                        }
+                        stream << strokatemp;
+                        stream << "\n   </tr>\n";
+                    }
+                }
+            }
+
+            //финальная вставка
+            stream << "  </table>\n";
+            stream << " </body>\n";
+            stream << "</html>\n";
+            templates->close();
+
+            QMessageBox::warning(this, "Внимание", "Экспорт произведен успешно!!!");
+
+        */
+
+    }
     else
         QMessageBox::warning(this, "Ошибка", "Ошибка экспорта!!!");
 
